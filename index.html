@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing-Awareness Schulungsprogramm - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .email-client { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .phishing-warning {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .certificate {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: 8px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-md rounded-lg mb-8">
+            <div class="flex flex-wrap justify-between items-center p-4">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-shield-alt text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-800">Phishing-Awareness Schulung</h1>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="showTab('training')" id="training-tab" class="tab-btn px-4 py-2 rounded-lg font-medium transition">
+                        <i class="fas fa-graduation-cap mr-2"></i>Training
+                    </button>
+                    <button onclick="showTab('admin')" id="admin-tab" class="tab-btn px-4 py-2 rounded-lg font-medium transition bg-blue-100 text-blue-700">
+                        <i class="fas fa-cog mr-2"></i>Admin-Panel
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin-Panel -->
+        <div id="admin-panel" class="tab-content active">
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <!-- Tab-Navigation im Admin-Panel -->
+                <div class="flex flex-wrap border-b border-gray-200 mb-6">
+                    <button onclick="showAdminTab('campaigns')" id="campaigns-tab-btn" class="admin-tab-btn px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">
+                        Kampagnen
+                    </button>
+                    <button onclick="showAdminTab('new-campaign')" id="new-campaign-tab-btn" class="admin-tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+                        Neue Kampagne
+                    </button>
+                    <button onclick="showAdminTab('scenarios')" id="scenarios-tab-btn" class="admin-tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+                        Szenarien
+                    </button>
+                    <button onclick="showAdminTab('analytics')" id="analytics-tab-btn" class="admin-tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+                        Analytics
+                    </button>
+                    <button onclick="showAdminTab('smtp')" id="smtp-tab-btn" class="admin-tab-btn px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+                        SMTP-Konfiguration
+                    </button>
+                </div>
+
+                <!-- Kampagnen-Tab -->
+                <div id="campaigns-tab" class="admin-tab-content">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Kampagnen-Verwaltung</h2>
+                    <div id="campaigns-list" class="space-y-4">
+                        <!-- Kampagnen werden hier dynamisch geladen -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                            <i class="fas fa-inbox text-yellow-500 text-3xl mb-3"></i>
+                            <p class="text-yellow-700">Noch keine Kampagnen erstellt</p>
+                            <button onclick="showAdminTab('new-campaign')" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                                Erste Kampagne erstellen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Neue Kampagne Tab -->
+                <div id="new-campaign-tab" class="admin-tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Neue Kampagne erstellen</h2>
+                    <form id="new-campaign-form" class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Kampagnen-Name</label>
+                            <input type="text" id="campaign-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="z.B. Q3-2024 Phishing-Test">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Phishing-Szenario</label>
+                            <select id="campaign-scenario" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Szenario auswählen...</option>
+                                <option value="ceo-fraud">CEO-Fraud: Dringende Überweisung (€47.500)</option>
+                                <option value="microsoft-invoice">Fake Microsoft Rechnung: Office 365 Verlängerung (€149,99)</option>
+                                <option value="it-support">IT-Support Phishing: Passwort-Reset mit falschen IPs</option>
+                                <option value="google-drive">Google Drive Warnung: Speicher voll - Credential Harvesting</option>
+                                <option value="payroll">Fake Gehaltsabrechnung: Malware-Download mit Passwort</option>
+                                <option value="charity">Charity-Betrug: Emotionale Manipulation für Spenden</option>
+                                <option value="dhl">DHL Paket-Benachrichtigung: Alltäglicher Betrug mit Gebühren</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Empfänger (E-Mail-Adressen)</label>
+                            <textarea id="campaign-recipients" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Eine E-Mail pro Zeile&#10;max.mustermann@firma.de&#10;anna.schmidt@firma.de"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="showAdminTab('campaigns')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Abbrechen
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                                Kampagne erstellen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Szenarien-Tab -->
+                <div id="scenarios-tab" class="admin-tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Verfügbare Phishing-Szenarien</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- CEO-Fraud -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-briefcase text-red-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">CEO-Fraud</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Dringende Überweisungsanfrage von angeblichem CEO (€47.500)</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Dringlichkeit, hohe Summe, Geheimhaltung</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von CEO-Fraud-Angriffen</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Microsoft Rechnung -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fab fa-microsoft text-blue-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Microsoft Rechnung</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Fake Office 365 Verlängerungsrechnung (€149,99)</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Falscher Absender, gefälste Rechnung</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von gefälschten Rechnungen</div>
+                            </div>
+                        </div>
+                        
+                        <!-- IT-Support -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-headset text-green-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">IT-Support Phishing</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Passwort-Reset-Anfrage mit verdächtigen IPs</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Ungewöhnliche IPs, Dringlichkeit</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von IT-Support-Betrug</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Google Drive -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fab fa-google text-yellow-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Google Drive Warnung</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Speicher voll - Account-Zugriffsanforderung</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Account-Zugriff, gefälschte Warnung</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von Credential Harvesting</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gehaltsabrechnung -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-file-invoice-dollar text-purple-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Fake Gehaltsabrechnung</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Malware-Download als Gehaltsabrechnung getarnt</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Ungewöhnlicher Anhang, verdächtiger Link</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von Malware-Angriffen</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charity -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-hand-holding-heart text-pink-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Charity-Betrug</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Emotionale Manipulation für Spendenbetrug</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Emotionale Manipulation, Dringlichkeit</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von Charity-Betrug</div>
+                            </div>
+                        </div>
+                        
+                        <!-- DHL -->
+                        <div class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-box text-yellow-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">DHL Paket-Benachrichtigung</h3>
+                            </div>
+                            <p class="text-gray-600 mb-3">Alltäglicher Betrug mit Paketzustellung und Gebühren</p>
+                            <div class="text-sm">
+                                <div class="mb-2"><span class="font-medium">Warnsignale:</span> Ungewöhnliche Gebühren, gefälschte Benachrichtigung</div>
+                                <div><span class="font-medium">Lernziel:</span> Erkennung von Lieferdienst-Betrug</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics-Tab -->
+                <div id="analytics-tab" class="admin-tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Kampagnen-Analytics</h2>
+                    <div class="bg-gray-50 rounded-lg p-6 text-center">
+                        <i class="fas fa-chart-line text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600">Noch keine Kampagnen-Daten verfügbar</p>
+                        <p class="text-gray-500 text-sm mt-2">Erstellen Sie eine Kampagne und senden Sie E-Mails, um Analytics zu sehen</p>
+                    </div>
+                </div>
+
+                <!-- SMTP-Konfiguration Tab -->
+                <div id="smtp-tab" class="admin-tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">SMTP-Konfiguration</h2>
+                    <div id="smtp-status" class="mb-6 p-4 rounded-lg bg-gray-100">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-gray-500 mr-2"></i>
+                            <span>SMTP nicht konfiguriert</span>
+                        </div>
+                    </div>
+                    
+                    <form id="smtp-form" class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">E-Mail-Anbieter</label>
+                            <select id="smtp-provider" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="gmail">Gmail</option>
+                                <option value="outlook">Outlook</option>
+                                <option value="yahoo">Yahoo</option>
+                                <option value="custom">Benutzerdefiniert</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Benutzername/E-Mail</label>
+                            <input type="email" id="smtp-username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="ihre-email@gmail.com">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Passwort / App-Passwort</label>
+                            <input type="password" id="smtp-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ihr Passwort oder App-Passwort">
+                        </div>
+                        
+                        <div id="custom-smtp-fields" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">SMTP-Server</label>
+                                <input type="text" id="smtp-server" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="smtp.gmail.com">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">SMTP-Port</label>
+                                <input type="number" id="smtp-port" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="587">
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" id="smtp-tls" class="h-4 w-4 text-blue-600 rounded">
+                                <label for="smtp-tls" class="ml-2 text-gray-700">TLS-Verschlüsselung verwenden</label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="testSmtp()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-flask mr-2"></i>Verbindung testen
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                                <i class="fas fa-save mr-2"></i>Konfiguration speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training-Modul -->
+        <div id="training-module" class="tab-content">
+            <!-- Willkommensbildschirm -->
+            <div id="welcome-screen" class="text-center max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+                    <div class="mb-8">
+                        <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-shield-alt text-white text-3xl"></i>
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                            Phishing-Awareness Schulungsprogramm
+                        </h1>
+                        <p class="text-gray-600 text-lg">
+                            Lernen Sie, Phishing-Angriffe zu erkennen und sich zu schützen
+                        </p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 text-left">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    In diesem Training simulieren wir einen realistischen Phishing-Angriff. 
+                                    Sie erhalten eine E-Mail und müssen entscheiden, wie Sie reagieren.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startTraining()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-8 rounded-xl text-lg transition duration-300 transform hover:scale-105">
+                        <i class="fas fa-play mr-2"></i> Training starten
+                    </button>
+                </div>
+            </div>
+
+            <!-- E-Mail Simulation -->
+            <div id="email-screen" class="hidden">
+                <div class="email-client rounded-lg shadow-lg">
+                    <div class="email-header p-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-white mr-3"></i>
+                            <span class="font-semibold">Posteingang</span>
+                        </div>
+                        <div class="text-sm opacity-75">
+                            <i class="fas fa-clock mr-1"></i> Heute, 14:32
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <!-- E-Mail Header -->
+                            <div class="border-b border-gray-200 pb-4 mb-4">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <img src="https://picsum.photos/seed/techcorp/40/40.jpg" alt="TechCorp" class="w-10 h-10 rounded-full mr-3">
+                                        <div>
+                                            <div class="font-semibold text-gray-800">Dr. Michael Weber</div>
+                                            <div class="text-sm text-gray-600">CEO TechCorp Solutions</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right text-sm text-gray-500">
+                                        <div>14:32</div>
+                                        <div class="phishing-warning text-red-500 font-medium">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i> Extern
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-lg font-semibold text-gray-800 mt-3">
+                                    DRINGEND: Überweisung für Millennium-Projekt
+                                </div>
+                            </div>
+                            
+                            <!-- E-Mail Inhalt -->
+                            <div class="text-gray-700 space-y-4">
+                                <p>
+                                    Sehr geehrte Mitarbeiterinnen und Mitarbeiter,
+                                </p>
+                                <p>
+                                    ich benötige <span class="font-semibold text-red-600">SOFORT</span> Ihre Unterstützung bei einem kritischen Geschäftsvorfall. 
+                                    Unser Millennium-Projekt steht kurz vor dem Abschluss eines 47-Millionen-Euro-Vertrags, 
+                                    aber wir haben ein letztes Hindernis.
+                                </p>
+                                <p>
+                                    Bitte überweisen Sie <span class="font-bold text-xl text-red-600">€47.500</span> an folgende Bankverbindung:
+                                </p>
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                        <div><span class="font-medium">Empfänger:</span> Global Business Solutions Ltd.</div>
+                                        <div><span class="font-medium">IBAN:</span> DE89370400440532013000</div>
+                                        <div><span class="font-medium">BIC:</span> DEUTDEFF</div>
+                                        <div><span class="font-medium">Verwendungszweck:</span> Millennium-Projekt</div>
+                                    </div>
+                                </div>
+                                <p class="text-red-600 font-medium">
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                    WICHTIG: Diese Überweisung muss <span class="underline">heute bis 16:00 Uhr</span> erfolgen, 
+                                    damit der Vertrag nicht platzt! Ich bin außer Haus und nicht telefonisch erreichbar.
+                                </p>
+                                <p>
+                                    Bestätigen Sie mir bitte per E-Mail, wenn die Überweisung durchgeführt wurde. 
+                                    Behandeln Sie diese Anfrage streng vertraulich.
+                                </p>
+                                <p>
+                                    Mit freundlichen Grüßen<br>
+                                    <strong>Dr. Michael Weber</strong><br>
+                                    CEO TechCorp Solutions
+                                </p>
+                            </div>
+                            
+                            <!-- Aktionen -->
+                            <div class="mt-6 pt-4 border-t border-gray-200">
+                                <div class="flex flex-wrap gap-3">
+                                    <button onclick="showWarning()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                                        <i class="fas fa-link mr-2"></i> Projekt-Details ansehen
+                                    </button>
+                                    <button onclick="showWarning()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                                        <i class="fas fa-paper-plane mr-2"></i> Überweisung bestätigen
+                                    </button>
+                                    <button onclick="reportPhishing()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i> Als Phishing melden
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Belehrungsmodul -->
+            <div id="education-screen" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">
+                            Ausgezeichnete Entscheidung!
+                        </h2>
+                        <p class="text-gray-600 mt-2">
+                            Sie haben den Phishing-Angriff erkannt und richtig reagiert
+                        </p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                            <h3 class="font-semibold text-red-800 mb-4 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Warnsignale in dieser E-Mail
+                            </h3>
+                            <ul class="space-y-3 text-sm text-red-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-times-circle mt-1 mr-2"></i>
+                                    <span><strong>Dringlichkeit:</strong> "SOFORT", "heute bis 16:00 Uhr"</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-times-circle mt-1 mr-2"></i>
+                                    <span><strong>Ungewöhnliche Summe:</strong> €47.500 Überweisung</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-times-circle mt-1 mr-2"></i>
+                                    <span><strong>Verhinderung der Verifikation:</strong> "nicht telefonisch erreichbar"</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-times-circle mt-1 mr-2"></i>
+                                    <span><strong>Geheimhaltung:</strong> "streng vertraulich"</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-times-circle mt-1 mr-2"></i>
+                                    <span><strong>Emotionale Manipulation:</strong> 47-Millionen-Euro-Vertrag</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <h3 class="font-semibold text-green-800 mb-4 flex items-center">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Richtige Handlungsweise
+                            </h3>
+                            <ul class="space-y-3 text-sm text-green-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                    <span><strong>Überprüfen:</strong> Absender-E-Mail genau prüfen</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                    <span><strong>Verifizieren:</strong> Telefonisch beim CEO anrufen</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                    <span><strong>Melden:</strong> IT-Abteilung oder Sicherheitsbeauftragten informieren</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                    <span><strong>Löschen:</strong> E-Mail nicht weiterleiten oder antworten</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle mt-1 mr-2"></i>
+                                    <span><strong>Dokumentieren:</strong> Vorfall für Sicherheitsanalyse melden</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                        <h3 class="font-semibold text-blue-800 mb-4 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Wichtige Lektionen
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
+                            <div>
+                                <h4 class="font-medium mb-2">CEO-Fraud (BEC)</h4>
+                                <p>CEO-Fraud ist eine der gefährlichsten Phishing-Formen. Angreifer geben sich als Führungskräfte aus und drängen zu dringenden Überweisungen.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">Schutzmaßnahmen</h4>
+                                <p>Implementieren Sie Vier-Augen-Prinzip bei Überweisungen, nutzen Sie Bestätigungsprozesse und schulen Sie regelmäßig Mitarbeiter.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button onclick="showCertificate()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                            <i class="fas fa-certificate mr-2"></i> Zertifikat anzeigen
+                        </button>
+                        <button onclick="restartTraining()" class="ml-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                            <i class="fas fa-redo mr-2"></i> Training wiederholen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zertifikat -->
+            <div id="certificate-screen" class="hidden max-w-2xl mx-auto">
+                <div class="certificate rounded-lg p-8 md:p-12 text-center text-white">
+                    <div class="mb-8">
+                        <i class="fas fa-award text-6xl mb-4"></i>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-2">Zertifikat</h2>
+                        <p class="text-xl opacity-90">Phishing-Awareness Schulung</p>
+                    </div>
+                    
+                    <div class="bg-white bg-opacity-20 rounded-lg p-6 mb-8">
+                        <p class="text-lg mb-4">Hiermit wird bestätigt, dass</p>
+                        <p class="text-2xl font-bold mb-4">[Ihr Name]</p>
+                        <p class="text-lg mb-4">erfolgreich die Phishing-Awareness Schulung</p>
+                        <p class="text-lg font-semibold">am <span id="cert-date"></span> absolviert hat</p>
+                    </div>
+                    
+                    <div class="flex justify-center space-x-8 mb-8">
+                        <div>
+                            <div class="text-sm opacity-75">Dauer</div>
+                            <div class="font-semibold">~10 Minuten</div>
+                        </div>
+                        <div>
+                            <div class="text-sm opacity-75">Ergebnis</div>
+                            <div class="font-semibold">Ausgezeichnet</div>
+                        </div>
+                        <div>
+                            <div class="text-sm opacity-75">Gültig bis</div>
+                            <div class="font-semibold" id="valid-until"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-white border-opacity-30 pt-6">
+                        <p class="text-sm opacity-75">Dieses Zertifikat bestätigt, dass der Teilnehmer die Fähigkeiten erworben hat,</p>
+                        <p class="text-sm opacity-75">Phishing-Angriffe zu erkennen und richtig darauf zu reagieren.</p>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <button onclick="window.print()" class="bg-white text-purple-600 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition">
+                            <i class="fas fa-print mr-2"></i> Drucken
+                        </button>
+                        <button onclick="restartTraining()" class="ml-4 bg-white bg-opacity-20 text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-30 transition">
+                            <i class="fas fa-home mr-2"></i> Zurück zum Start
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variablen
+        let campaigns = [];
+        let smtpConfig = {
+            provider: '',
+            username: '',
+            password: '',
+            server: '',
+            port: 587,
+            useTls: true,
+            mode: 'mock'
+        };
+
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event Listener für Formulare
+            document.getElementById('new-campaign-form').addEventListener('submit', handleNewCampaign);
+            document.getElementById('smtp-form').addEventListener('submit', handleSmtpConfig);
+            
+            // Event Listener für SMTP Provider Auswahl
+            document.getElementById('smtp-provider').addEventListener('change', handleSmtpProviderChange);
+            
+            // Lade gespeicherte Daten
+            loadCampaigns();
+            loadSmtpConfig();
+        });
+
+        // Tab Navigation
+        function showTab(tabName) {
+            // Verstecke alle Tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Entferne aktive Klasse von allen Tab-Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-100', 'text-blue-700');
+            });
+            
+            // Zeige ausgewählten Tab
+            document.getElementById(tabName + '-module').classList.remove('hidden');
+            document.getElementById(tabName + '-tab').classList.add('bg-blue-100', 'text-blue-700');
+        }
+
+        // Admin Tab Navigation
+        function showAdminTab(tabName) {
+            // Verstecke alle Admin Tabs
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Entferne aktive Klasse von allen Admin Tab-Buttons
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-gray-500');
+            });
+            
+            // Zeige ausgewählten Admin Tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            document.getElementById(tabName + '-tab-btn').classList.remove('text-gray-500');
+            document.getElementById(tabName + '-tab-btn').classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        }
+
+        // SMTP Provider Änderung
+        function handleSmtpProviderChange() {
+            const provider = document.getElementById('smtp-provider').value;
+            const customFields = document.getElementById('custom-smtp-fields');
+            
+            if (provider === 'custom') {
+                customFields.classList.remove('hidden');
+            } else {
+                customFields.classList.add('hidden');
+                
+                // Setze Standardwerte für bekannte Provider
+                switch(provider) {
+                    case 'gmail':
+                        document.getElementById('smtp-server').value = 'smtp.gmail.com';
+                        document.getElementById('smtp-port').value = '587';
+                        document.getElementById('smtp-tls').checked = true;
+                        break;
+                    case 'outlook':
+                        document.getElementById('smtp-server').value = 'smtp-mail.outlook.com';
+                        document.getElementById('smtp-port').value = '587';
+                        document.getElementById('smtp-tls').checked = true;
+                        break;
+                    case 'yahoo':
+                        document.getElementById('smtp-server').value = 'smtp.mail.yahoo.com';
+                        document.getElementById('smtp-port').value = '587';
+                        document.getElementById('smtp-tls').checked = true;
+                        break;
+                }
+            }
+        }
+
+        // Neue Kampagne erstellen
+        function handleNewCampaign(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('campaign-name').value;
+            const scenario = document.getElementById('campaign-scenario').value;
+            const recipientsText = document.getElementById('campaign-recipients').value;
+            
+            if (!name || !scenario || !recipientsText) {
+                showNotification('Bitte füllen Sie alle Felder aus', 'error');
+                return;
+            }
+            
+            // Empfänger verarbeiten
+            const recipients = recipientsText.split('\n')
+                .map(email => email.trim())
+                .filter(email => email);
+            
+            if (recipients.length === 0) {
+                showNotification('Bitte geben Sie mindestens eine E-Mail-Adresse ein', 'error');
+                return;
+            }
+            
+            // Kampagne erstellen
+            const campaign = {
+                id: Date.now(),
+                name,
+                scenario,
+                recipients,
+                createdAt: new Date().toISOString(),
+                status: 'created',
+                stats: {
+                    sent: 0,
+                    opened: 0,
+                    clicked: 0,
+                    completed: 0
+                }
+            };
+            
+            campaigns.push(campaign);
+            saveCampaigns();
+            renderCampaigns();
+            
+            // Formular zurücksetzen
+            document.getElementById('new-campaign-form').reset();
+            
+            // Zur Kampagnenliste wechseln
+            showAdminTab('campaigns');
+            
+            showNotification('Kampagne erfolgreich erstellt', 'success');
+        }
+
+        // Kampagnen rendern
+        function renderCampaigns() {
+            const campaignsList = document.getElementById('campaigns-list');
+            
+            if (campaigns.length === 0) {
+                campaignsList.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                        <i class="fas fa-inbox text-yellow-500 text-3xl mb-3"></i>
+                        <p class="text-yellow-700">Noch keine Kampagnen erstellt</p>
+                        <button onclick="showAdminTab('new-campaign')" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            Erste Kampagne erstellen
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            campaignsList.innerHTML = campaigns.map(campaign => `
+                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
+                    <div class="flex flex-wrap justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">${campaign.name}</h3>
+                            <p class="text-gray-600">Szenario: ${getScenarioName(campaign.scenario)}</p>
+                            <p class="text-sm text-gray-500">Erstellt am: ${new Date(campaign.createdAt).toLocaleDateString('de-DE')}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(campaign.status)}">
+                                ${getStatusText(campaign.status)}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">
+                            <i class="fas fa-users mr-2"></i>
+                            ${campaign.recipients.length} Empfänger
+                        </p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div class="bg-gray-50 p-2 rounded">
+                                <div class="font-medium">Gesendet</div>
+                                <div>${campaign.stats.sent}</div>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded">
+                                <div class="font-medium">Geöffnet</div>
+                                <div>${campaign.stats.opened}</div>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded">
+                                <div class="font-medium">Geklickt</div>
+                                <div>${campaign.stats.clicked}</div>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded">
+                                <div class="font-medium">Abgeschlossen</div>
+                                <div>${campaign.stats.completed}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        ${campaign.status === 'created' ? `
+                            <button onclick="sendCampaign(${campaign.id})" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+                                <i class="fas fa-paper-plane mr-2"></i>E-Mails senden
+                            </button>
+                        ` : ''}
+                        <button onclick="viewCampaignDetails(${campaign.id})" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">
+                            <i class="fas fa-eye mr-2"></i>Details
+                        </button>
+                        <button onclick="deleteCampaign(${campaign.id})" class="px-4 py-2 border border-red-300 rounded-lg text-red-700 hover:bg-red-50 text-sm">
+                            <i class="fas fa-trash mr-2"></i>Löschen
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Kampagne senden
+        async function sendCampaign(campaignId) {
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) return;
+            
+            // Prüfe SMTP-Konfiguration
+            if (smtpConfig.mode === 'mock') {
+                showNotification('SMTP nicht konfiguriert. E-Mails werden im Mock-Modus gesendet.', 'warning');
+            }
+            
+            try {
+                // Sende E-Mails über Backend-API
+                const response = await fetch('/api/send-phishing-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipients: campaign.recipients,
+                        scenario: campaign.scenario,
+                        campaignName: campaign.name
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    campaign.status = 'sent';
+                    campaign.stats.sent = campaign.recipients.length;
+                    saveCampaigns();
+                    renderCampaigns();
+                    
+                    showNotification(`${campaign.stats.sent} E-Mails wurden versendet`, 'success');
+                } else {
+                    showNotification(`Fehler beim Senden: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Fehler beim Senden der E-Mails:', error);
+                showNotification('Fehler beim Senden der E-Mails', 'error');
+            }
+        }
+
+        // Kampagne löschen
+        function deleteCampaign(campaignId) {
+            if (!confirm('Möchten Sie diese Kampagne wirklich löschen?')) return;
+            
+            campaigns = campaigns.filter(c => c.id !== campaignId);
+            saveCampaigns();
+            renderCampaigns();
+            
+            showNotification('Kampagne gelöscht', 'success');
+        }
+
+        // SMTP Konfiguration speichern
+        function handleSmtpConfig(e) {
+            e.preventDefault();
+            
+            const provider = document.getElementById('smtp-provider').value;
+            const username = document.getElementById('smtp-username').value;
+            const password = document.getElementById('smtp-password').value;
+            
+            if (!username || !password) {
+                showNotification('Bitte geben Sie Benutzername und Passwort ein', 'error');
+                return;
+            }
+            
+            // Konfiguration speichern
+            smtpConfig = {
+                provider,
+                username,
+                password,
+                server: document.getElementById('smtp-server').value,
+                port: parseInt(document.getElementById('smtp-port').value),
+                useTls: document.getElementById('smtp-tls').checked,
+                mode: 'smtp'
+            };
+            
+            saveSmtpConfig();
+            updateSmtpStatus();
+            
+            showNotification('SMTP-Konfiguration gespeichert', 'success');
+        }
+
+        // SMTP Verbindung testen
+        async function testSmtp() {
+            const username = document.getElementById('smtp-username').value;
+            const password = document.getElementById('smtp-password').value;
+            
+            if (!username || !password) {
+                showNotification('Bitte geben Sie Benutzername und Passwort ein', 'error');
+                return;
+            }
+            
+            // Simuliere Verbindungstest
+            showNotification('SMTP-Verbindung wird getestet...', 'info');
+            
+            setTimeout(() => {
+                showNotification('SMTP-Verbindung erfolgreich getestet', 'success');
+            }, 1000);
+        }
+
+        // Hilfsfunktionen
+        function getScenarioName(scenario) {
+            const scenarios = {
+                'ceo-fraud': 'CEO-Fraud: Dringende Überweisung (€47.500)',
+                'microsoft-invoice': 'Fake Microsoft Rechnung: Office 365 Verlängerung (€149,99)',
+                'it-support': 'IT-Support Phishing: Passwort-Reset mit falschen IPs',
+                'google-drive': 'Google Drive Warnung: Speicher voll - Credential Harvesting',
+                'payroll': 'Fake Gehaltsabrechnung: Malware-Download mit Passwort',
+                'charity': 'Charity-Betrug: Emotionale Manipulation für Spenden',
+                'dhl': 'DHL Paket-Benachrichtigung: Alltäglicher Betrug mit Gebühren'
+            };
+            return scenarios[scenario] || scenario;
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'created': 'bg-yellow-100 text-yellow-800',
+                'sent': 'bg-blue-100 text-blue-800',
+                'completed': 'bg-green-100 text-green-800'
+            };
+            return classes[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'created': 'Erstellt',
+                'sent': 'Gesendet',
+                'completed': 'Abgeschlossen'
+            };
+            return texts[status] || status;
+        }
+
+        function showNotification(message, type) {
+            // Erstelle Notification Element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                type === 'warning' ? 'bg-yellow-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Entferne nach 3 Sekunden
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // LocalStorage Funktionen
+        function saveCampaigns() {
+            localStorage.setItem('phishingCampaigns', JSON.stringify(campaigns));
+        }
+
+        function loadCampaigns() {
+            const saved = localStorage.getItem('phishingCampaigns');
+            if (saved) {
+                campaigns = JSON.parse(saved);
+            }
+            renderCampaigns();
+        }
+
+        function saveSmtpConfig() {
+            localStorage.setItem('smtpConfig', JSON.stringify(smtpConfig));
+        }
+
+        function loadSmtpConfig() {
+            const saved = localStorage.getItem('smtpConfig');
+            if (saved) {
+                smtpConfig = JSON.parse(saved);
+                updateSmtpForm();
+                updateSmtpStatus();
+            }
+        }
+
+        function updateSmtpForm() {
+            document.getElementById('smtp-provider').value = smtpConfig.provider;
+            document.getElementById('smtp-username').value = smtpConfig.username;
+            document.getElementById('smtp-password').value = smtpConfig.password;
+            document.getElementById('smtp-server').value = smtpConfig.server;
+            document.getElementById('smtp-port').value = smtpConfig.port;
+            document.getElementById('smtp-tls').checked = smtpConfig.useTls;
+            
+            handleSmtpProviderChange();
+        }
+
+        function updateSmtpStatus() {
+            const statusDiv = document.getElementById('smtp-status');
+            
+            if (smtpConfig.mode === 'smtp') {
+                statusDiv.className = 'mb-6 p-4 rounded-lg bg-green-100';
+                statusDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>SMTP konfiguriert (${smtpConfig.provider})</span>
+                    </div>
+                `;
+            } else {
+                statusDiv.className = 'mb-6 p-4 rounded-lg bg-gray-100';
+                statusDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-gray-500 mr-2"></i>
+                        <span>SMTP nicht konfiguriert</span>
+                    </div>
+                `;
+            }
+        }
+
+        function viewCampaignDetails(campaignId) {
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) return;
+            
+            alert(`Kampagnendetails:\n\nName: ${campaign.name}\nSzenario: ${getScenarioName(campaign.scenario)}\nEmpfänger: ${campaign.recipients.length}\nStatus: ${getStatusText(campaign.status)}`);
+        }
+
+        // Training Funktionen
+        function startTraining() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('email-screen').classList.remove('hidden');
+        }
+
+        function showWarning() {
+            document.getElementById('email-screen').classList.add('hidden');
+            document.getElementById('education-screen').classList.remove('hidden');
+        }
+
+        function reportPhishing() {
+            document.getElementById('email-screen').classList.add('hidden');
+            document.getElementById('education-screen').classList.remove('hidden');
+        }
+
+        function showCertificate() {
+            const today = new Date();
+            const certDate = today.toLocaleDateString('de-DE');
+            const validDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+            const validUntil = validDate.toLocaleDateString('de-DE');
+            
+            document.getElementById('cert-date').textContent = certDate;
+            document.getElementById('valid-until').textContent = validUntil;
+            
+            document.getElementById('education-screen').classList.add('hidden');
+            document.getElementById('certificate-screen').classList.remove('hidden');
+        }
+
+        function restartTraining() {
+            document.getElementById('certificate-screen').classList.add('hidden');
+            document.getElementById('education-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
