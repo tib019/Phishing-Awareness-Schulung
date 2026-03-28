@@ -10,9 +10,9 @@ const envPath = path.join(__dirname, '.env');
 const dotenvResult = require('dotenv').config({ path: envPath });
 
 if (dotenvResult.error) {
-  console.error('❌ Fehler beim Laden der .env-Datei:', dotenvResult.error);
+ console.error(' Fehler beim Laden der.env-Datei:', dotenvResult.error);
 } else {
-  console.log('✅ .env-Datei erfolgreich geladen.');
+ console.log('.env-Datei erfolgreich geladen.');
 }
 
 const app = express();
@@ -26,21 +26,21 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
 console.log('=== Phishing-Awareness Server gestartet ===');
-console.log('🌐 URL:', `http://localhost:${PORT}`);
-console.log('📁 Verzeichnis:', __dirname);
+console.log(' URL:', `http://localhost:${PORT}`);
+console.log(' Verzeichnis:', __dirname);
 
 const indexHtmlPath = path.join(__dirname, 'index.html');
 const indexHtmlExists = fs.existsSync(indexHtmlPath);
-console.log('🔍 Prüfe index.html bei:', indexHtmlPath);
+console.log(' Prüfe index.html bei:', indexHtmlPath);
 if (indexHtmlExists) {
-  console.log('✅ index.html gefunden');
+ console.log(' index.html gefunden');
 } else {
-  console.error('❌ index.html nicht gefunden!');
+ console.error(' index.html nicht gefunden!');
 }
 
-console.log('📧 SMTP_SERVICE:', SMTP_SERVICE || 'nicht konfiguriert');
-console.log('📧 SMTP_USER:', SMTP_USER || 'nicht konfiguriert');
-console.log('🔑 SMTP_PASS:', SMTP_PASS ? '******' : 'nicht konfiguriert');
+console.log(' SMTP_SERVICE:', SMTP_SERVICE || 'nicht konfiguriert');
+console.log(' SMTP_USER:', SMTP_USER || 'nicht konfiguriert');
+console.log(' SMTP_PASS:', SMTP_PASS? '******': 'nicht konfiguriert');
 console.log('=====================================');
 
 let transporter;
@@ -52,9 +52,9 @@ if (SMTP_USER && SMTP_PASS) {
       pass: SMTP_PASS,
     },
   });
-  console.log('✅ SMTP-Konfiguration erfolgreich.');
+ console.log(' SMTP-Konfiguration erfolgreich.');
 } else {
-  console.warn('⚠️ SMTP-Konfiguration unvollständig. Verwende Mock-Modus für E-Mail-Versand.');
+ console.warn('️ SMTP-Konfiguration unvollständig. Verwende Mock-Modus für E-Mail-Versand.');
 }
 
 // Funktion zum Abrufen des E-Mail-Inhalts basierend auf dem Szenario
@@ -176,13 +176,13 @@ app.post('/api/send-phishing-email', async (req, res) => {
     if (transporter) {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.error(`❌ Fehler beim Senden der E-Mail an ${to}:`, error);
+ console.error(` Fehler beim Senden der E-Mail an ${to}:`, error);
         } else {
-          console.log(`✅ E-Mail erfolgreich gesendet an ${to}:`, info.response);
+ console.log(` E-Mail erfolgreich gesendet an ${to}:`, info.response);
         }
       });
     } else {
-      console.log(`🧪 Mock-Modus: E-Mail für Szenario '${scenario}' an ${to} gesendet.`);
+ console.log(` Mock-Modus: E-Mail für Szenario '${scenario}' an ${to} gesendet.`);
     }
   };
 
