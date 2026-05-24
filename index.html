@@ -744,6 +744,16 @@
             showNotification('Kampagne erfolgreich erstellt', 'success');
         }
 
+        // HTML-Escape-Funktion zur Vermeidung von XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // Kampagnen rendern
         function renderCampaigns() {
             const campaignsList = document.getElementById('campaigns-list');
@@ -765,7 +775,7 @@
                 <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
                     <div class="flex flex-wrap justify-between items-start mb-4">
                         <div>
-                            <h3 class="font-bold text-lg text-gray-800">${campaign.name}</h3>
+                            <h3 class="font-bold text-lg text-gray-800">${escapeHtml(campaign.name)}</h3>
                             <p class="text-gray-600">Szenario: ${getScenarioName(campaign.scenario)}</p>
                             <p class="text-sm text-gray-500">Erstellt am: ${new Date(campaign.createdAt).toLocaleDateString('de-DE')}</p>
                         </div>
@@ -1015,7 +1025,7 @@
                 statusDiv.innerHTML = `
                     <div class="flex items-center">
                         <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                        <span>SMTP konfiguriert (${smtpConfig.provider})</span>
+                        <span>SMTP konfiguriert (${escapeHtml(smtpConfig.provider)})</span>
                     </div>
                 `;
             } else {
